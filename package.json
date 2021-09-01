@@ -1,0 +1,25 @@
+{
+  "name": "altexpress",
+  "version": "0.0.1",
+  "description": "NodeJs Express based backend engine",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "node",
+    "nodejs",
+    "express",
+    "engine",
+    "framework",
+    "backend"
+  ],
+  "author": "PIY",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.13",
+    "typescript": "^4.4.2"
+  }
+}

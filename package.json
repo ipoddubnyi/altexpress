@@ -1,8 +1,9 @@
 {
-  "name": "altexpress",
-  "version": "0.0.1",
+  "name": "@altcrm/altexpress",
+  "version": "0.0.3",
   "description": "NodeJs Express based backend engine",
   "scripts": {
+    "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -13,8 +14,10 @@
     "framework",
     "backend"
   ],
-  "author": "PIY",
-  "license": "ISC",
+  "author": "Alt CRM Software",
+  "license": "Apache License 2.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "dependencies": {
     "express": "^4.17.1"
   },

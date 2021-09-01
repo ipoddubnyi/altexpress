@@ -6,7 +6,7 @@
 
 ``` ts
 import { Request, Response } from "express";
-import { Module, Controller, Get, Post, Put, Delete } from "@altexpress/common";
+import { Module, Controller, Get, Post, Put, Delete } from "@altcrm/altexpress";
 
 @Controller("/clients")
 export class ClientController {
@@ -31,7 +31,7 @@ export class ApplicationModule {}
 3. Create an application:
 
 ``` ts
-import { Application } from "@altexpress/common";
+import { Application } from "@altcrm/altexpress";
 import { ApplicationModule } from "./application.module";
 
 async function startServer(port: number): Promise<void> {
@@ -39,14 +39,15 @@ async function startServer(port: number): Promise<void> {
         // create application and specify main module
         const app = new Application(ApplicationModule);
 
-        // !!! DO NOT USE !!! (already defined):
+        // - !!! DO NOT USE !!! "express.urlencoded", "express.json" -
+        // - already defined inside the "Application":
         // app.use(express.urlencoded({ extended: true }));
         // app.use(express.json());
         
-        // to specify global API prefix:
+        // - to specify global API prefix:
         // app.setGlobalPrefix("/api/v1");
 
-        // to specify middlewares:
+        // - to specify middlewares:
         // app.use(morgan("dev"));
         // app.use(cors());
 

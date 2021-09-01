@@ -48,3 +48,6 @@ Thumbs.db
 *.mov
 *.wmv
 
+# tsc build files
+/**/*.map
+tsconfig.tsbuildinfo

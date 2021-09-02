@@ -1,4 +1,4 @@
-import express from "express";
+import * as express from "express";
 import { Reflector } from "./reflector";
 import HttpResponse from "./httpResponse";
 
@@ -8,14 +8,18 @@ export interface IApplication {
     listen(port: number): Promise<void>;
 }
 
+export interface IConfigurableModule {
+    configure(): Promise<void>;
+}
+
 export class Application implements IApplication {
     private readonly app: express.Application;
-    private readonly module: any;
+    private readonly moduleType: any;
     private globalPrefix: string | null = null;
 
-    public constructor(module: any) {
+    public constructor(moduleType: any) {
         this.app = express();
-        this.module = module;
+        this.moduleType = moduleType;
 
         // базовая конфигурация
         this.configure();
@@ -26,8 +30,10 @@ export class Application implements IApplication {
         this.app.use(express.json());
     }
 
-    private applyRoutes(): void {
-        Reflector.applyModuleRoutes(new this.module(), this.applyRoute);
+    private async applyRoutes(): Promise<void> {
+        const module = await Reflector.createModuleInstance(this.moduleType);
+        const router = await Reflector.applyModuleRoutes(module);
+        this.globalPrefix ? this.app.use(this.globalPrefix, router) : this.app.use(router);
 
         this.app.use((req: express.Request, res: express.Response, _: Function) => {
             res.status(404).send("Page is not found.");
@@ -39,20 +45,6 @@ export class Application implements IApplication {
         });
     }
 
-    private applyRoute(router: express.Router, prefix?: string): void {
-        if (prefix) {
-            this.app.use(prefix, router);
-            return;
-        }
-
-        if (this.globalPrefix) {
-            this.app.use(this.globalPrefix, router);
-            return;
-        }
-
-        this.app.use(router);
-    }
-
     public setGlobalPrefix(prefix: string): void {
         this.globalPrefix = prefix;
     }
@@ -61,8 +53,8 @@ export class Application implements IApplication {
         this.app.use(...args);
     }
 
-    public listen(port: number): Promise<void> {
-        this.applyRoutes();
+    public async listen(port: number): Promise<void> {
+        await this.applyRoutes();
         return new Promise(resolve => this.app.listen(port, resolve));
     }
 }

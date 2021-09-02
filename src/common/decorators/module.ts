@@ -11,7 +11,7 @@ export interface IModuleMetadata {
 }
 
 /** Module decorator. */
-export function Module(meta: IModuleMetadata) {
+export function Module(meta: IModuleMetadata = {}) {
     return function <T extends { new(...args: any[]): {} }>(constructor: T) {
         return class extends constructor {
             __altexpress_module_meta = meta;

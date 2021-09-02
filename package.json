@@ -1,10 +1,9 @@
 {
   "name": "@altcrm/altexpress",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "NodeJs Express based backend engine",
   "scripts": {
-    "build": "tsc",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc"
   },
   "keywords": [
     "node",

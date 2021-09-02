@@ -5,8 +5,7 @@
 1. Create a controller: 
 
 ``` ts
-import { Request, Response } from "express";
-import { Module, Controller, Get, Post, Put, Delete } from "@altcrm/altexpress";
+import { Request, Response, Module, Controller, Get, Post, Put, Delete } from "@altcrm/altexpress";
 
 @Controller("/clients")
 export class ClientController {
@@ -149,7 +148,7 @@ export default class Guard {
 
 ``` ts
 @Controller("/clients")
-export class ClientControllerV2 {
+export class ClientController {
 
     @Get("/:id", Guard.Auth)
     public async get(req: Request, res: Response): Promise<void> {

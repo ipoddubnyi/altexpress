@@ -8,7 +8,12 @@ export function Get(path: string, ...middleware: any[]) {
         }
 
         const meta = getControllerMeta(target);
-        meta.routes.get(path, ...middleware, descriptor.value);
+        meta.routes.push({
+            method: "get",
+            path: path,
+            middleware: middleware,
+            handler: descriptor.value
+        });
     };
 }
 
@@ -20,7 +25,12 @@ export function Post(path: string, ...middleware: any[]) {
         }
 
         const meta = getControllerMeta(target);
-        meta.routes.post(path, ...middleware, descriptor.value);
+        meta.routes.push({
+            method: "post",
+            path: path,
+            middleware: middleware,
+            handler: descriptor.value
+        });
     };
 }
 
@@ -32,7 +42,12 @@ export function Put(path: string, ...middleware: any[]) {
         }
 
         const meta = getControllerMeta(target);
-        meta.routes.put(path, ...middleware, descriptor.value);
+        meta.routes.push({
+            method: "put",
+            path: path,
+            middleware: middleware,
+            handler: descriptor.value
+        });
     };
 }
 
@@ -44,7 +59,12 @@ export function Patch(path: string, ...middleware: any[]) {
         }
 
         const meta = getControllerMeta(target);
-        meta.routes.patch(path, ...middleware, descriptor.value);
+        meta.routes.push({
+            method: "patch",
+            path: path,
+            middleware: middleware,
+            handler: descriptor.value
+        });
     };
 }
 
@@ -56,6 +76,11 @@ export function Delete(path: string, ...middleware: any[]) {
         }
 
         const meta = getControllerMeta(target);
-        meta.routes.delete(path, ...middleware, descriptor.value);
+        meta.routes.push({
+            method: "delete",
+            path: path,
+            middleware: middleware,
+            handler: descriptor.value
+        });
     };
 }

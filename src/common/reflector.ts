@@ -52,8 +52,17 @@ export class Reflector {
 
         const router = Router();
         const meta = controller.__altexpress_controller_meta as IControllerMetadata;
-        if (meta.routes) {
-            router.use(meta.path, meta.routes);
+        const r = this.applyModuleControllerMethods(controller);
+        router.use(meta.path, r);
+        return router;
+    }
+
+    private static applyModuleControllerMethods(controller: any): Router {
+        const meta = controller.__altexpress_controller_meta as IControllerMetadata;
+        const router = Router({ mergeParams: true });
+        for (const route of meta.routes) {
+            const bound = route.handler.bind(controller);
+            (router as any)[route.method](route.path, ...route.middleware, bound);
         }
         return router;
     }

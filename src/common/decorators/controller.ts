@@ -1,4 +1,9 @@
-import { Router } from "express";
+export interface IControllerRouteMetadata {
+    method: "get" | "post" | "put" | "patch" | "delete";
+    path: string;
+    middleware: any[];
+    handler: any;
+}
 
 /** Controller meta data. */
 export interface IControllerMetadata {
@@ -8,7 +13,7 @@ export interface IControllerMetadata {
     path: string;
 
     /** Маршруты методов контроллера. */
-    routes: Router;
+    routes: IControllerRouteMetadata[];
 }
 
 /** Controller decorator. */
@@ -32,8 +37,8 @@ export function getControllerMeta(target: any): IControllerMetadata {
     if (!target.__altexpress_controller_meta) {
         target.__altexpress_controller_meta = {
             path: "/",
-            routes: Router({ mergeParams: true }),
-        };
+            routes: [],
+        } as IControllerMetadata;
     }
     return target.__altexpress_controller_meta;
 }

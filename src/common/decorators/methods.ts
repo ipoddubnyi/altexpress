@@ -1,4 +1,26 @@
+import { NextFunction, Request, Response } from "express";
 import { getControllerMeta } from "./controller";
+import { HttpResponse } from "../httpResponse";
+
+async function decorate(
+    fun: Function,
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<void> {
+    try {
+        const result = await fun(req, res);
+
+        if (result instanceof HttpResponse) {
+            res.status(result.status).json(result.body);
+            return;
+        }
+        
+        res.status(200).json(result);
+    } catch (e: any) {
+        next(e);
+    }
+}
 
 /** GET http method decorator. */
 export function Get(path: string, ...middleware: any[]) {
@@ -12,7 +34,9 @@ export function Get(path: string, ...middleware: any[]) {
             method: "get",
             path: path,
             middleware: middleware,
-            handler: descriptor.value
+            handler: async function (req: Request, res: Response, next: NextFunction): Promise<void> {
+                await decorate(descriptor.value.bind(this), req, res, next)
+            }
         });
     };
 }
@@ -29,7 +53,9 @@ export function Post(path: string, ...middleware: any[]) {
             method: "post",
             path: path,
             middleware: middleware,
-            handler: descriptor.value
+            handler: async function (req: Request, res: Response, next: NextFunction): Promise<void> {
+                await decorate(descriptor.value.bind(this), req, res, next)
+            }
         });
     };
 }
@@ -46,7 +72,9 @@ export function Put(path: string, ...middleware: any[]) {
             method: "put",
             path: path,
             middleware: middleware,
-            handler: descriptor.value
+            handler: async function (req: Request, res: Response, next: NextFunction): Promise<void> {
+                await decorate(descriptor.value.bind(this), req, res, next)
+            }
         });
     };
 }
@@ -63,7 +91,9 @@ export function Patch(path: string, ...middleware: any[]) {
             method: "patch",
             path: path,
             middleware: middleware,
-            handler: descriptor.value
+            handler: async function (req: Request, res: Response, next: NextFunction): Promise<void> {
+                await decorate(descriptor.value.bind(this), req, res, next)
+            }
         });
     };
 }
@@ -80,7 +110,9 @@ export function Delete(path: string, ...middleware: any[]) {
             method: "delete",
             path: path,
             middleware: middleware,
-            handler: descriptor.value
+            handler: async function (req: Request, res: Response, next: NextFunction): Promise<void> {
+                await decorate(descriptor.value.bind(this), req, res, next)
+            }
         });
     };
 }

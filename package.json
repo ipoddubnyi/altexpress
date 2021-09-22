@@ -1,7 +1,10 @@
 {
   "name": "@altcrm/altexpress",
-  "version": "0.0.7",
+  "version": "0.0.12",
   "description": "NodeJs Express based backend engine",
+  "homepage": "https://github.com/ipoddubnyi/altexpress",
+  "author": "ipoddubnyi",
+  "license": "Apache License 2.0",
   "scripts": {
     "build": "tsc"
   },
@@ -13,8 +16,6 @@
     "framework",
     "backend"
   ],
-  "author": "Alt CRM Software",
-  "license": "Apache License 2.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "dependencies": {

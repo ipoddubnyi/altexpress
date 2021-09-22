@@ -1,16 +1,23 @@
 export class HttpException extends Error {
-    private _code: number;
+    private readonly _status: number;
 
-    public get code(): number {
-        return this._code;
+    public constructor(status: number, message: string) {
+        super(message);
+        this._status = status;
+    }
+
+    public get status(): number {
+        return this._status;
     }
 
     public get message(): string {
         return this.message;
     }
 
-    constructor(code: number, message: string) {
-        super(message);
-        this._code = code;
+    public toObject(): any {
+        return {
+            status: this.status,
+            message: this.message
+        };
     }
 }

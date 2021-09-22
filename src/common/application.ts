@@ -1,6 +1,6 @@
 import * as express from "express";
 import { Reflector } from "./reflector";
-import HttpResponse from "./httpResponse";
+import { HttpException } from "./exceptions";
 
 export interface IApplication {
     setGlobalPrefix(prefix: string): void;
@@ -39,9 +39,15 @@ export class Application implements IApplication {
             res.status(404).send("Page is not found.");
         });
 
-        this.app.use((err: Error, req: express.Request, res: express.Response, _: Function) => {
-            console.error(err.stack);
-            HttpResponse.error(res, err);
+        this.app.use((e: Error, req: express.Request, res: express.Response, _: Function) => {
+            console.error(e);
+
+            if (e instanceof HttpException) {
+                res.status(e.status).json(e.toObject());
+                return;
+            }
+    
+            res.status(500).json({ message: "Internal server error." });
         });
     }
 

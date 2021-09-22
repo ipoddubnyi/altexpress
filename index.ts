@@ -1,3 +1,3 @@
-export { Request, Response, Router } from "express";
+export { Request, Response, NextFunction, Router } from "express";
 export * from "./src/common";
 export * from "./src/validation";

@@ -1,5 +1,6 @@
-import { Router } from "express";
-import { IControllerMetadata, IModuleMetadata } from "./decorators";
+import { Router, Request, Response, NextFunction } from "express";
+import { extractParameters, IControllerMetadata, IModuleMetadata } from "./decorators";
+import { HttpResponse } from "./http-response";
 
 export class Reflector {
 
@@ -61,8 +62,13 @@ export class Reflector {
         const meta = controller.__altexpress_controller_meta as IControllerMetadata;
         const router = Router({ mergeParams: true });
         for (const route of meta.routes) {
-            const bound = route.handler.bind(controller);
-            (router as any)[route.method](route.path, ...route.middleware, bound);
+            const handler = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+                const args = extractParameters(req, res, next, meta.params[route.property]);
+                const bound = route.handler.bind(controller, ...args);
+                await this.decorateMethod(bound, req, res, next);
+            }
+
+            (router as any)[route.method](route.path, ...route.middleware, handler);
         }
         return router;
     }
@@ -78,5 +84,25 @@ export class Reflector {
             router.use(r);
         }
         return router;
+    }
+
+    private static async decorateMethod(
+        fun: Function,
+        req: Request,
+        res: Response,
+        next: NextFunction,
+    ): Promise<void> {
+        try {
+            const result = await fun(req, res, next);
+    
+            if (result instanceof HttpResponse) {
+                res.status(result.status).json(result.body);
+                return;
+            }
+            
+            res.status(200).json(result);
+        } catch (e: any) {
+            next(e);
+        }
     }
 }

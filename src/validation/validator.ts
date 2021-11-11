@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import { validationResult } from "express-validator";
 
 export function Validate<T extends Validator>(type: new() => T): any {
@@ -9,7 +9,7 @@ export function Validate<T extends Validator>(type: new() => T): any {
 export class Validator {
     protected async run(req: Request): Promise<void> {}
 
-    public async validate(req: Request, res: Response, next: Function): Promise<any> {
+    public async validate(req: Request, res: Response, next: NextFunction): Promise<any> {
         await this.run(req);
 
         const errors = validationResult(req);

@@ -1,8 +1,36 @@
-export interface IControllerRouteMetadata {
-    method: "get" | "post" | "put" | "patch" | "delete";
+export enum MethodType {
+    Get = "get",
+    Post = "post",
+    Put = "put",
+    Patch = "patch",
+    Delete = "delete",
+    Options = "options",
+    All = "all",
+}
+
+export enum ParameterType {
+    Request = "request",
+    Response = "response",
+    Next = "next",
+    Params = "params",
+    Query = "query",
+    Body = "body",
+    Headers = "headers",
+    Cookies = "cookies",
+}
+
+export interface IControllerRouteMeta {
+    property: string;
+    method: MethodType;
     path: string;
     middleware: any[];
     handler: any;
+}
+
+export interface IParameterMeta {
+    index: number;
+    type: ParameterType;
+    name: string | undefined;
 }
 
 /** Controller meta data. */
@@ -13,7 +41,10 @@ export interface IControllerMetadata {
     path: string;
 
     /** Маршруты методов контроллера. */
-    routes: IControllerRouteMetadata[];
+    routes: IControllerRouteMeta[];
+
+    /** Соотношение методов с параметрами. */
+    params: { [methodName: string]: IParameterMeta[] };
 }
 
 /** Controller decorator. */
@@ -38,6 +69,7 @@ export function getControllerMeta(target: any): IControllerMetadata {
         target.__altexpress_controller_meta = {
             path: "/",
             routes: [],
+            params: {},
         } as IControllerMetadata;
     }
     return target.__altexpress_controller_meta;

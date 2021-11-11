@@ -1,10 +1,10 @@
 import { HttpException } from "./exceptions";
 
-export class HttpResponse {
+export class HttpResponse<T = any> {
     private readonly _status: number;
-    private readonly _body: any;
+    private readonly _body: T;
 
-    public constructor(status: number, body: any) {
+    public constructor(status: number, body: T) {
         this._status = status;
         this._body  = body;
     }
@@ -13,15 +13,15 @@ export class HttpResponse {
         return this._status;
     }
 
-    public get body(): any {
+    public get body(): T {
         return this._body;
     }
 
-    public static success(body: any): HttpResponse {
+    public static success<T = any>(body: T): HttpResponse<T> {
         return new HttpResponse(200, body);
     }
 
-    public static successCreated(body: any): HttpResponse {
+    public static successCreated<T = any>(body: T): HttpResponse<T> {
         return new HttpResponse(201, body);
     }
 

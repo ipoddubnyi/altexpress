@@ -1,118 +1,43 @@
-import { NextFunction, Request, Response } from "express";
-import { getControllerMeta } from "./controller";
-import { HttpResponse } from "../httpResponse";
+import { getControllerMeta, MethodType } from "./controller";
 
-async function decorate(
-    fun: Function,
-    req: Request,
-    res: Response,
-    next: NextFunction
-): Promise<void> {
-    try {
-        const result = await fun(req, res);
+function methodDecoratorFactory(method: MethodType): any {
+    return function (path: string, ...middleware: any[]): MethodDecorator {
+        return function (target: any, propertyKey: string | symbol, descriptor: PropertyDescriptor) {
+            const methodName = propertyKey as string;
 
-        if (result instanceof HttpResponse) {
-            res.status(result.status).json(result.body);
-            return;
-        }
-        
-        res.status(200).json(result);
-    } catch (e: any) {
-        next(e);
+            if (!descriptor || (typeof descriptor.value !== "function")) {
+                throw new TypeError(`Only methods can be decorated. <${methodName}> is not a method!`);
+            }
+
+            const meta = getControllerMeta(target);
+            meta.routes.push({
+                property: methodName,
+                method: method,
+                path: path,
+                middleware: middleware,
+                handler: descriptor.value,
+            });
+        };
     }
 }
 
 /** GET http method decorator. */
-export function Get(path: string, ...middleware: any[]) {
-    return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
-        if (!descriptor || (typeof descriptor.value !== "function")) {
-            throw new TypeError(`Only methods can be decorated with @Get. <${propertyKey}> is not a method!`);
-        }
-
-        const meta = getControllerMeta(target);
-        meta.routes.push({
-            method: "get",
-            path: path,
-            middleware: middleware,
-            handler: async function (req: Request, res: Response, next: NextFunction): Promise<void> {
-                await decorate(descriptor.value.bind(this), req, res, next)
-            }
-        });
-    };
-}
+export const Get = methodDecoratorFactory(MethodType.Get);
 
 /** POST http method decorator. */
-export function Post(path: string, ...middleware: any[]) {
-    return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
-        if (!descriptor || (typeof descriptor.value !== "function")) {
-            throw new TypeError(`Only methods can be decorated with @Post. <${propertyKey}> is not a method!`);
-        }
-
-        const meta = getControllerMeta(target);
-        meta.routes.push({
-            method: "post",
-            path: path,
-            middleware: middleware,
-            handler: async function (req: Request, res: Response, next: NextFunction): Promise<void> {
-                await decorate(descriptor.value.bind(this), req, res, next)
-            }
-        });
-    };
-}
+export const Post = methodDecoratorFactory(MethodType.Post);
 
 /** PUT http method decorator. */
-export function Put(path: string, ...middleware: any[]) {
-    return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
-        if (!descriptor || (typeof descriptor.value !== "function")) {
-            throw new TypeError(`Only methods can be decorated with @Put. <${propertyKey}> is not a method!`);
-        }
-
-        const meta = getControllerMeta(target);
-        meta.routes.push({
-            method: "put",
-            path: path,
-            middleware: middleware,
-            handler: async function (req: Request, res: Response, next: NextFunction): Promise<void> {
-                await decorate(descriptor.value.bind(this), req, res, next)
-            }
-        });
-    };
-}
+export const Put = methodDecoratorFactory(MethodType.Put);
 
 /** PATCH http method decorator. */
-export function Patch(path: string, ...middleware: any[]) {
-    return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
-        if (!descriptor || (typeof descriptor.value !== "function")) {
-            throw new TypeError(`Only methods can be decorated with @Patch. <${propertyKey}> is not a method!`);
-        }
-
-        const meta = getControllerMeta(target);
-        meta.routes.push({
-            method: "patch",
-            path: path,
-            middleware: middleware,
-            handler: async function (req: Request, res: Response, next: NextFunction): Promise<void> {
-                await decorate(descriptor.value.bind(this), req, res, next)
-            }
-        });
-    };
-}
+export const Patch = methodDecoratorFactory(MethodType.Patch);
 
 /** DELETE http method decorator. */
-export function Delete(path: string, ...middleware: any[]) {
-    return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
-        if (!descriptor || (typeof descriptor.value !== "function")) {
-            throw new TypeError(`Only methods can be decorated with @Delete. <${propertyKey}> is not a method!`);
-        }
+export const Delete = methodDecoratorFactory(MethodType.Delete);
 
-        const meta = getControllerMeta(target);
-        meta.routes.push({
-            method: "delete",
-            path: path,
-            middleware: middleware,
-            handler: async function (req: Request, res: Response, next: NextFunction): Promise<void> {
-                await decorate(descriptor.value.bind(this), req, res, next)
-            }
-        });
-    };
-}
+/** OPTIONS http method decorator. */
+export const Options = methodDecoratorFactory(MethodType.Options);
+
+/** ALL http method decorator. */
+export const All = methodDecoratorFactory(MethodType.All);

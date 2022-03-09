@@ -99,6 +99,11 @@ export class Reflector {
                 res.status(result.status).json(result.body);
                 return;
             }
+
+            if (res.getHeader("Content-Type")) {
+                res.status(200).send(result);
+                return;
+            }
             
             res.status(200).json(result);
         } catch (e: any) {

@@ -1,7 +1,5 @@
 # ALTEXPRESS Backend Engine
 
-! Attention ! The engine is in development. Functionality can be changed.
-
 ## Get started
 
 1. Create a controller: 
@@ -240,3 +238,42 @@ export class ClientController {
 }
 ```
 
+### Argument decorators
+
+You can also use argument decorators to make your code cleaner:
+
+``` ts
+@Controller("/clients")
+export class ClientController {
+
+    @Get("/search", Guard.Auth)
+    public async search(
+        @Query("search") search: string
+    ): Promise<Client[]> {
+        return await this.clientService.search(search);
+    }
+
+    @Get("/:id", Guard.Auth)
+    public async get(
+        @Params("id") id: string
+    ): Promise<Client> {
+        return await this.clientService.get(id);
+    }
+
+    @Put("/:id", Guard.Auth)
+    public async update(
+        @Params("id") id: string,
+        @Body() dto: ClientUpdateDto
+    ): Promise<Client> {
+        return await this.clientService.update(id, dto);
+    }
+
+    @Patch("/:id", Guard.Auth)
+    public async updatePhone(
+        @Params("id") id: string,
+        @Body("phone") phone: string
+    ): Promise<Client> {
+        return await this.clientService.updatePhone(id, phone);
+    }
+}
+```

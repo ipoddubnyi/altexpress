@@ -1,5 +1,7 @@
 # ALTEXPRESS Backend Engine
 
+! Attention ! The engine is in development. Functionality can be changed.
+
 ## Get started
 
 1. Create a controller: 
@@ -274,6 +276,21 @@ export class ClientController {
         @Body("phone") phone: string
     ): Promise<Client> {
         return await this.clientService.updatePhone(id, phone);
+    }
+}
+```
+
+### Use request and response objects
+
+The controller is instantiated at each request.  The instance has properties `request`, `response`, which can be accessed from every method. You can extends `ControllerBase` class to access this properties from every method.
+
+``` ts
+@Controller("/clients")
+export class ClientController extends ControllerBase {
+    @Get("/:id", Guard.Auth)
+    public async get(): Promise<Client> {
+        const id = this.request.params.id // here
+        return await this.clientService.get(id);
     }
 }
 ```

@@ -30,7 +30,12 @@ export interface IControllerRouteMeta {
 export interface IParameterMeta {
     index: number;
     type: ParameterType;
-    name: string | undefined;
+    property: string | undefined;
+    processors: IProcessor[];
+}
+
+export interface IProcessor<T = any, R = any> {
+    (value: T): R;
 }
 
 /** Controller meta data. */
@@ -49,16 +54,10 @@ export interface IControllerMetadata {
 
 /** Controller decorator. */
 export function Controller(path: string) {
-    function updateMeta(target: any): IControllerMetadata {
+    return function <T extends { new(...args: any[]): {} }>(constructor: T) {
+        const target = (constructor as any);
         const meta = getControllerMeta(target);
         meta.path = path;
-        return meta;
-    }
-
-    return function <T extends { new(...args: any[]): {} }>(constructor: T) {
-        return class extends constructor {
-            __altexpress_controller_meta = updateMeta(this);
-        }
     }
 }
 

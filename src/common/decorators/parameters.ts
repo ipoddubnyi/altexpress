@@ -1,16 +1,16 @@
 import { Request, Response, NextFunction } from "express";
-import { getControllerMeta, IParameterMeta, ParameterType } from "./controller";
+import { getControllerMeta, IParameterMeta, ParameterType, IProcessor } from "./controller";
 
 function paramDecoratorFactory(type: ParameterType): any {
-    return function(name?: string): ParameterDecorator {
+    return function(property?: string, ...processors: IProcessor[]): ParameterDecorator {
         return function(target: any, propertyKey: string | symbol, index: number) {
-            const meta = getControllerMeta(target);
+            const meta = getControllerMeta((target as any).constructor);
             const methodName = propertyKey as string;
 
             if (!meta.params[methodName])
                 meta.params[methodName] = [];
 
-            meta.params[methodName].push({ index, type, name });
+            meta.params[methodName].push({ index, type, property, processors });
         };
     };
 }
@@ -27,7 +27,11 @@ export function extractParameters(
   
     const args = [];
     for (const param of params) {
-        args[param.index] = extractParameter(req, res, next, param);
+        let value = extractParameter(req, res, next, param);
+        for (const processor of param.processors) {
+            value = processor(value);
+        }
+        args[param.index] = value;
     }
     return args;
 }
@@ -40,29 +44,29 @@ function extractParameter(
 ): any {
     switch (param.type) {
         case ParameterType.Request:
-            return getParam(req, null, param.name);
+            return getParam(req, null, param.property);
         case ParameterType.Response:
             return res;
         case ParameterType.Next:
             return next;
         case ParameterType.Params:
-            return getParam(req, "params", param.name);
+            return getParam(req, "params", param.property);
         case ParameterType.Query:
-            return getParam(req, "query", param.name);
+            return getParam(req, "query", param.property);
         case ParameterType.Body:
-            return getParam(req, "body", param.name);
+            return getParam(req, "body", param.property);
         case ParameterType.Headers:
-            return getParam(req, "headers", param.name);
+            return getParam(req, "headers", param.property);
         case ParameterType.Cookies:
-            return getParam(req, "cookies", param.name);
+            return getParam(req, "cookies", param.property);
     }
 
     return null;
 }
 
-function getParam(source: any, paramType: string | null, name: string | undefined): any {
+function getParam(source: any, paramType: string | null, property: string | undefined): any {
     const param = (paramType ? source[paramType] : null) ?? source;
-    return name ? param[name] : param;
+    return property ? param[property] : param;
 }
 
 /** Request object. */

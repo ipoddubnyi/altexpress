@@ -39,30 +39,33 @@ export class Reflector {
         if (!moduleMeta.controllers)
             return router;
 
-        for (const type of moduleMeta.controllers) {
-            const controller = new type();
-            const r = this.applyModuleControllerRoutes(controller, moduleMeta);
+        for (const controllerType of moduleMeta.controllers) {
+            const r = this.applyModuleControllerRoutes(controllerType);
             router.use(r);
         }
         return router;
     }
 
-    private static applyModuleControllerRoutes(controller: any, moduleMeta: IModuleMetadata): Router {
-        if (!controller.__altexpress_controller_meta)
-            throw new Error(`${controller} does not seem to be a valid controller.`);
+    private static applyModuleControllerRoutes(controllerType: any): Router {
+        if (!controllerType.__altexpress_controller_meta)
+            throw new Error(`${controllerType} does not seem to be a valid controller.`);
 
         const router = Router();
-        const meta = controller.__altexpress_controller_meta as IControllerMetadata;
-        const r = this.applyModuleControllerMethods(controller);
+        const meta = controllerType.__altexpress_controller_meta as IControllerMetadata;
+        const r = this.applyModuleControllerMethods(controllerType);
         router.use(meta.path, r);
         return router;
     }
 
-    private static applyModuleControllerMethods(controller: any): Router {
-        const meta = controller.__altexpress_controller_meta as IControllerMetadata;
+    private static applyModuleControllerMethods(controllerType: any): Router {
+        const meta = controllerType.__altexpress_controller_meta as IControllerMetadata;
         const router = Router({ mergeParams: true });
         for (const route of meta.routes) {
             const handler = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+                const controller = new controllerType();
+                controller.request = req;
+                controller.response = res;
+
                 const args = extractParameters(req, res, next, meta.params[route.property]);
                 const bound = route.handler.bind(controller, ...args);
                 await this.decorateMethod(bound, req, res, next);

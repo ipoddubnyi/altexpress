@@ -9,7 +9,7 @@ function methodDecoratorFactory(method: MethodType): any {
                 throw new TypeError(`Only methods can be decorated. <${methodName}> is not a method!`);
             }
 
-            const meta = getControllerMeta(target);
+            const meta = getControllerMeta((target as any).constructor);
             meta.routes.push({
                 property: methodName,
                 method: method,

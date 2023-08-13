@@ -294,3 +294,58 @@ export class ClientController extends ControllerBase {
     }
 }
 ```
+
+### Use dependency injection
+
+You can use the dependency injection for controllers:
+
+``` ts
+@Controller("/orders")
+export class OrderController extends ControllerBase {
+    public constructor(
+        @Inject(OrderService) private readonly orderService: OrderService,
+        @Inject(ClientService) private readonly clientService: ClientService,
+        @Inject(DateTimeService) private readonly dateTimeService: DateTimeService,
+    ) {
+        super();
+    }
+}
+```
+
+or services:
+
+``` ts
+export class OrderService {
+    public constructor(
+        @Inject(DateTimeService) private readonly dateTimeService: DateTimeService,
+    ) { }
+}
+```
+
+Dependencied should be registered in module's `services` section:
+
+``` ts
+@Module({
+    controllers: [
+        OrderController,
+        ClientController,
+    ],
+    services: [
+        // Provide only the type for injection:
+        OrderService,
+
+        // It is an equivalent to:
+        { type: ClientService, lifetime: ServiceLifetime.Scoped },
+
+        // You can provide concrete implementation for injection:
+        { type: DateTimeService, concrete: DateTimeServiceFake, lifetime: ServiceLifetime.Singleton },
+    ],
+})
+export class OrderModule {}
+```
+
+Service lifetime could be one of the next values:
+
+- `Scoped` (default) - Service is instantiated once for every request.
+- `Transient` - Service is instantiated once for every call.
+- `Singleton` - Service is instantiated once for the entire module lifetime.

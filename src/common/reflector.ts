@@ -1,6 +1,7 @@
 import { Router, Request, Response, NextFunction } from "express";
-import { extractParameters, IControllerMetadata, IModuleMetadata } from "./decorators";
+import { extractParameters, IControllerMetadata, IModuleMetadata, ServiceLifetime } from "./decorators";
 import { HttpResponse } from "./http-response";
+import { DIContainer } from "./di-container";
 
 export class Reflector {
 
@@ -22,9 +23,10 @@ export class Reflector {
 
         const router = Router();
         const meta = module.__altexpress_module_meta as IModuleMetadata;
+        const diContainer = this.createDIContainer(meta);
 
         // применяем маршруты контроллеров текущего модуля
-        let r = this.applyModuleControllersRoutes(meta);
+        let r = this.applyModuleControllersRoutes(meta, diContainer);
         meta.prefix ? router.use(meta.prefix, r) : router.use(r);
 
         // применяем маршруты подмодулей
@@ -34,35 +36,55 @@ export class Reflector {
         return router;
     }
 
-    private static applyModuleControllersRoutes(moduleMeta: IModuleMetadata): Router {
+    private static createDIContainer(moduleMeta: IModuleMetadata): DIContainer {
+        const diContainer = new DIContainer();
+
+        if (moduleMeta.services) {
+            for (const service of moduleMeta.services) {
+                const type = service.type ?? service;
+                const concrete = service.concrete ?? type;
+                const lifetime = service.lifetime ?? ServiceLifetime.Scoped;
+
+                diContainer.register(type, concrete, lifetime);
+            }
+        }
+
+        return diContainer;
+    }
+
+    private static applyModuleControllersRoutes(moduleMeta: IModuleMetadata, diContainer: DIContainer): Router {
         const router = Router();
         if (!moduleMeta.controllers)
             return router;
 
         for (const controllerType of moduleMeta.controllers) {
-            const r = this.applyModuleControllerRoutes(controllerType);
+            const r = this.applyModuleControllerRoutes(controllerType, diContainer);
             router.use(r);
         }
         return router;
     }
 
-    private static applyModuleControllerRoutes(controllerType: any): Router {
+    private static applyModuleControllerRoutes(controllerType: any, diContainer: DIContainer): Router {
         if (!controllerType.__altexpress_controller_meta)
             throw new Error(`${controllerType} does not seem to be a valid controller.`);
 
         const router = Router();
         const meta = controllerType.__altexpress_controller_meta as IControllerMetadata;
-        const r = this.applyModuleControllerMethods(controllerType);
+        const r = this.applyModuleControllerMethods(controllerType, diContainer);
         router.use(meta.path, r);
         return router;
     }
 
-    private static applyModuleControllerMethods(controllerType: any): Router {
+    private static applyModuleControllerMethods(controllerType: any, diContainer: DIContainer): Router {
         const meta = controllerType.__altexpress_controller_meta as IControllerMetadata;
+
         const router = Router({ mergeParams: true });
         for (const route of meta.routes) {
             const handler = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
-                const controller = new controllerType();
+                diContainer.clearScoped();
+                const params = diContainer.resolveParameters(controllerType);
+                
+                const controller = new controllerType(...params);
                 controller.request = req;
                 controller.response = res;
 

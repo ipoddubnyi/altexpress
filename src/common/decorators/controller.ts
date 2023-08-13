@@ -42,13 +42,13 @@ export interface IProcessor<T = any, R = any> {
 export interface IControllerMetadata {
     // @Get, @Post и другие декораторы записывают в поле `meta.routes` свои маршруты
 
-    /** Путь базового маршрута контроллера. */
+    /** The path of the controller's base route. */
     path: string;
 
-    /** Маршруты методов контроллера. */
+    /** Routes of the controller's methods. */
     routes: IControllerRouteMeta[];
 
-    /** Соотношение методов с параметрами. */
+    /** The ratio of methods to parameters. */
     params: { [methodName: string]: IParameterMeta[] };
 }
 

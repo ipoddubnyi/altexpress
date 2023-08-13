@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { getControllerMeta, IParameterMeta, ParameterType, IProcessor } from "./controller";
 
 function paramDecoratorFactory(type: ParameterType): any {
-    return function(property?: string, ...processors: IProcessor[]): ParameterDecorator {
+    return function(property?: string, ...processors: IProcessor[]) {
         return function(target: any, propertyKey: string | symbol, index: number) {
             const meta = getControllerMeta((target as any).constructor);
             const methodName = propertyKey as string;

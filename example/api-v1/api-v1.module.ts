@@ -1,10 +1,10 @@
 import { Module } from "@altcrm/altexpress";
-import { ClientModule } from "./client.module";
+import { OrderModule } from "./order.module";
 
 @Module({
     prefix: "/api/v1",
     modules: [
-        ClientModule,
+        OrderModule,
     ]
 })
 export class ApiV1Module {}

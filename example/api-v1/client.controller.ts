@@ -1,5 +1,5 @@
-import { Body, Controller, ControllerBase, Get, Params, Patch, processors, Put, Query } from "@altcrm/altexpress";
-import { Client, ClientUpdateDto } from "./client.schema";
+import { Body, Controller, ControllerBase, Get, Inject, Params, Patch, Post, processors, Put, Query } from "@altcrm/altexpress";
+import { Client, ClientCreateDto, ClientUpdateDto } from "./client.schema";
 import { ClientService } from "./client.service";
 import { Guard } from "../utils/guard";
 
@@ -8,7 +8,7 @@ import { Guard } from "../utils/guard";
 @Controller("/clients")
 export class ClientController extends ControllerBase {
     public constructor(
-        private readonly clientService = new ClientService(),
+        @Inject(ClientService) private readonly clientService: ClientService,
     ) {
         super();
     }
@@ -31,7 +31,18 @@ export class ClientController extends ControllerBase {
     ): Promise<Client> {
         const client = await this.clientService.get(id);
         if (!client) {
-            throw new Error("Cleint is not found.");
+            throw new Error("Client is not found.");
+        }
+        return client;
+    }
+
+    @Post("/", Guard.Auth)
+    public async create(
+        @Body() dto: ClientCreateDto
+    ): Promise<Client> {
+        const client = await this.clientService.create(dto);
+        if (!client) {
+            throw new Error("Client is not created.");
         }
         return client;
     }
@@ -43,7 +54,7 @@ export class ClientController extends ControllerBase {
     ): Promise<Client> {
         const client = await this.clientService.update(id, dto);
         if (!client) {
-            throw new Error("Cleint is not found.");
+            throw new Error("Client is not found.");
         }
         return client;
     }
@@ -55,7 +66,7 @@ export class ClientController extends ControllerBase {
     ): Promise<Client> {
         const client = await this.clientService.updatePhone(id, phone);
         if (!client) {
-            throw new Error("Cleint is not found.");
+            throw new Error("Client is not found.");
         }
         return client;
     }

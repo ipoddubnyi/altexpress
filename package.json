@@ -1,6 +1,6 @@
 {
   "name": "@altcrm/altexpress",
-  "version": "0.1.17",
+  "version": "1.0.18",
   "description": "NodeJs Express based backend engine",
   "homepage": "https://github.com/ipoddubnyi/altexpress",
   "author": "ipoddubnyi",

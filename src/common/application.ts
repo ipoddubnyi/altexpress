@@ -12,25 +12,45 @@ export interface IConfigurableModule {
     configure(): Promise<void>;
 }
 
-export class Application implements IApplication {
-    private readonly app: express.Application;
-    private readonly moduleType: any;
-    private globalPrefix: string | null = null;
+export interface IApplicationOptions {
+    /**
+     * Наибольший размер тела JSON: число байт или строка вида "5mb".
+     * По умолчанию — как в express, 100kb. Больше — ответ 413.
+     */
+    jsonLimit?: number | string;
+}
 
-    public constructor(moduleType: any) {
+export class Application implements IApplication {
+    protected readonly app: express.Application;
+    protected readonly moduleType: any;
+    protected readonly options: IApplicationOptions;
+    protected globalPrefix: string | null = null;
+
+    public constructor(moduleType: any, options: IApplicationOptions = {}) {
         this.app = express();
         this.moduleType = moduleType;
+        this.options = options;
 
         // базовая конфигурация
         this.configure();
     }
 
-    private configure(): void {
-        this.app.use(express.urlencoded({ extended: true }));
-        this.app.use(express.json());
+    protected configure(): void {
+        this.app.use(express.urlencoded({
+            extended: true,
+            verify: function (req, res, buf, encoding) {
+                (req as any).rawBody = buf;
+            }
+        }));
+        this.app.use(express.json({
+            limit: this.options.jsonLimit,
+            verify: function (req, res, buf, encoding) {
+                (req as any).rawBody = buf;
+            }
+        }));
     }
 
-    private async applyRoutes(): Promise<void> {
+    protected async applyRoutes(): Promise<void> {
         const module = await Reflector.createModuleInstance(this.moduleType);
         const router = await Reflector.applyModuleRoutes(module);
         this.globalPrefix ? this.app.use(this.globalPrefix, router) : this.app.use(router);
@@ -44,6 +64,14 @@ export class Application implements IApplication {
 
             if (e instanceof HttpException) {
                 res.status(e.status).json(e.toObject());
+                return;
+            }
+
+            // Ошибки разбора тела (express.json, express.urlencoded) несут свой статус:
+            // 413 — тело больше лимита, 400 — кривой JSON. Это ошибка запроса, а не сервера.
+            const status = (e as any).status;
+            if ((e as any).expose && typeof status === "number" && status >= 400 && status < 500) {
+                res.status(status).json({ message: e.message });
                 return;
             }
     

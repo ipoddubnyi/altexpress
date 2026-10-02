@@ -46,6 +46,8 @@ async function startServer(port: number): Promise<void> {
         // - already defined inside the "Application":
         // app.use(express.urlencoded({ extended: true }));
         // app.use(express.json());
+        // - to raise the JSON body limit (default "100kb", larger bodies get 413):
+        // const app = new Application(ApplicationModule, { jsonLimit: "5mb" });
         
         // - to specify global API prefix:
         // app.setGlobalPrefix("/api/v1");

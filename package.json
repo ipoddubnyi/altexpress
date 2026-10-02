@@ -1,12 +1,13 @@
 {
   "name": "@altcrm/altexpress",
-  "version": "1.0.18",
+  "version": "1.0.19",
   "description": "NodeJs Express based backend engine",
   "homepage": "https://github.com/ipoddubnyi/altexpress",
   "author": "ipoddubnyi",
   "license": "Apache License 2.0",
   "scripts": {
     "build": "tsc --build tsconfig.build.json",
+    "prepublishOnly": "npm run build",
     "start:example": "tsnd --respawn -r tsconfig-paths/register ./example/main.server.ts"
   },
   "keywords": [
